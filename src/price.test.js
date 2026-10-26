@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { total } from './price.js'
+import { total, tax, TAX_RATE_PERCENT } from './price.js'
 
 test('sums price × qty', () => {
   assert.equal(total([{ price: 100, qty: 2 }, { price: 50, qty: 1 }]), 250)
@@ -37,4 +37,26 @@ test('single item', () => {
 test('large numbers', () => {
   assert.equal(total([{ price: 1_000_000, qty: 1_000_000 }]), 1e12)
   assert.equal(total([{ price: Number.MAX_SAFE_INTEGER, qty: 1 }]), Number.MAX_SAFE_INTEGER)
+})
+
+test('tax rate is 10 percent', () => {
+  assert.equal(TAX_RATE_PERCENT, 10)
+})
+
+test('tax rounds down', () => {
+  assert.equal(tax(0), 0)
+  assert.equal(tax(9), 0)
+  assert.equal(tax(10), 1)
+  assert.equal(tax(999), 99)
+})
+
+test('tax with large amounts', () => {
+  assert.equal(tax(1_000_000), 100_000)
+  assert.equal(tax(1e12), 1e11)
+})
+
+test('tax throws TypeError for invalid amount', () => {
+  for (const bad of [-1, 1.5, NaN, Infinity, '100', null, undefined]) {
+    assert.throws(() => tax(bad), TypeError)
+  }
 })
