@@ -24,3 +24,17 @@ test('throws TypeError for invalid price or qty', () => {
 test('empty cart totals 0', () => {
   assert.equal(total([]), 0)
 })
+
+test('qty 0 contributes nothing', () => {
+  assert.equal(total([{ price: 100, qty: 0 }]), 0)
+  assert.equal(total([{ price: 100, qty: 0 }, { price: 50, qty: 2 }]), 100)
+})
+
+test('single item', () => {
+  assert.equal(total([{ price: 300, qty: 3 }]), 900)
+})
+
+test('large numbers', () => {
+  assert.equal(total([{ price: 1_000_000, qty: 1_000_000 }]), 1e12)
+  assert.equal(total([{ price: Number.MAX_SAFE_INTEGER, qty: 1 }]), Number.MAX_SAFE_INTEGER)
+})
