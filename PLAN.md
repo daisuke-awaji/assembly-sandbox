@@ -4,7 +4,7 @@
 `src/price.js` の `total(items)` は `items = [{price, qty}]` の `price * qty` の総和(税・割引なし)。テストは `src/price.test.js`(`npm test`)。
 
 ## 方針
-- 既存の `total(items)` は **挙動を変えない**(後方互換)。税・割引は別関数で追加する。
+- `total(items)` は入力検証済み(整数円のみ、上限超過は `RangeError`)。税・割引は別関数で追加する。
 - 金額は整数円のみ扱い、丸めは「円未満切り捨て」(`Math.floor`)に統一。税率は定数 `TAX_RATE_PERCENT = 10` とし、整数演算 `Math.floor(x * 10 / 100)` で浮動小数誤差を避ける。
 
 ## API 案 (`src/price.js`)
@@ -22,7 +22,7 @@ checkout(items, coupon?): { subtotal, discount, taxable, tax, total }
 - `items` が空 → すべて 0。`coupon` 省略/`null` → 割引 0。
 - 割引が小計超過 → taxable は 0 を下限(負にしない)。
 - percent が 0 以下・100 超、fixed が非整数・負数、未知の `type` → `RangeError`/`TypeError`。
-- `price`/`qty` が負・非整数・NaN → 入力検証で例外(既存 `total` の検証追加は別タスクで合意が必要)。
+- `price`/`qty` が負・非整数・NaN → `TypeError`。`total` は入力検証済み(整数円のみ、上限超過は `RangeError`)。
 - 端数: 税 `floor(999 * 0.1) = 99`、percent 割引も切り捨て(割引額が小さく出る=店側有利、仕様として明記)。
 - 大きな金額での `Number.MAX_SAFE_INTEGER` 超過(必要なら検証)。
 

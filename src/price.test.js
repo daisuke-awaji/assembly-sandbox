@@ -60,3 +60,23 @@ test('tax throws TypeError for invalid amount', () => {
     assert.throws(() => tax(bad), TypeError)
   }
 })
+
+test('total throws TypeError for fractional price or qty', () => {
+  for (const bad of [0.5, 1.5]) {
+    assert.throws(() => total([{ price: bad, qty: 1 }]), TypeError)
+    assert.throws(() => total([{ price: 1, qty: bad }]), TypeError)
+  }
+})
+
+test('total throws TypeError for non-object items', () => {
+  assert.throws(() => total([undefined]), TypeError)
+  assert.throws(() => total([5]), TypeError)
+})
+
+test('total throws RangeError beyond safe integer range', () => {
+  assert.throws(() => total([{ price: Number.MAX_SAFE_INTEGER, qty: 2 }]), RangeError)
+  assert.throws(
+    () => total([{ price: Number.MAX_SAFE_INTEGER, qty: 1 }, { price: 1, qty: 1 }]),
+    RangeError,
+  )
+})
